@@ -560,7 +560,10 @@ class LLMTrainer(Trainer):
                     elif save_lora_config and not _name.startswith("base_model"):
                         _name = f"base_model.model.{_name}"
 
-                    _param = _param.to(dtype=dtype) if dtype is not None else _param
+                    if dtype is not None and (
+                        _param.is_floating_point() or _param.is_complex()
+                    ):
+                        _param = _param.to(dtype=dtype)
                     tensor_size = get_tensor_size(_param)
                     if current_chunk_size + tensor_size > max_size_bytes:
                         file_name = create_file_name(
